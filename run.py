@@ -39,9 +39,12 @@ def get_distances():
         distances_dog_shit = []
 
         return jsonify(
-            {'clean_points': distances_points},
-            {'battery_recycling_points': distances_batteries},
-            {'dog_shits': distances_dog_shit}
+            {
+                'clean_points': distances_points,
+                'battery_recycling_points': distances_batteries,
+                'dog_shits': distances_dog_shit
+            },
+
         ), 200
     else:
         return jsonify({'msj': "You must provide lat and lon params"}), 400
