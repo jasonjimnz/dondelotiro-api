@@ -1,0 +1,6 @@
+GRAPH_DATABASE = {
+    "host": "NEO4J HOST",
+    "port": "NEO4J PORT",
+    "user": "NEO4J User",
+    "auth": "NEO4J Password"
+}
