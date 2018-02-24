@@ -105,3 +105,4 @@ config.py
 *.csv
 .idea
 *.xlsx
+*.xls
