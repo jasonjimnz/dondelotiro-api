@@ -2,7 +2,8 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from model import GraphModel
-
+from model import graph_driver
+from model import graph_session
 
 app = Flask(__name__)
 
@@ -66,6 +67,31 @@ def get_distances():
         ), 200
     else:
         return jsonify({'msj': "You must provide lat and lon params"}), 400
+
+
+@app.route('/create_point', methods=['POST'])
+def create_point():
+    code = 400
+    try:
+        lat = request.form.get('lat', None)
+        lon = request.form.get('lon', None)
+        container_type = request.form.get('container_type', '').split(',')
+        query = "CREATE (p:ProvisionalPoint{lat: %s, lon:% s , container_type: \"%s\"});"
+        s = graph_session.run(query % (
+            str(lat),
+            str(lon),
+            container_type
+        ))
+        msj = "Created point"
+        code = 201
+    except ValueError:
+        msj = "Latitude or longitude is not a float number"
+        code = 400
+    except:
+        print(e)
+        msj = "Invalid container type"
+
+    return jsonify({"msj": msj}), code
 
 
 if __name__ == "__main__":
