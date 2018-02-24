@@ -36,7 +36,15 @@ def get_distances():
             } for r in g_model.get_distances(float(lat), float(lon),"battery_recycling_point").records()
         ]
 
-        distances_dog_shit = []
+        distances_dog_shit = [
+            {
+                'latitude': r['latitude'],
+                'longitude': r['longitude'],
+                'distance': r['point_distance'],
+                'container_type': r['container_type'],
+                'trash_types': r['trash_types']
+            } for r in g_model.get_distances(float(lat), float(lon),"dog_shit_trash").records()
+        ]
 
         return jsonify(
             {

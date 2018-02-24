@@ -111,6 +111,23 @@ class GraphModel(object):
             params += 'lon: %s' % e['Longitud']
             graph_session.run(base_query % params)
             print("Saved %d batteries container" % i)
+        list_dog_shit_container = json.load(open('Papeleras_con_expendedor_de_bolsas.json'))
+        for i,e in enumerate(list_dog_shit_container):
+            print(e['latitud'].replace(',','.'), e['longitud'].replace(',','.'))
+            params = ''
+            params += 'container_type: "dog_shit_trash",'
+            params += 'entity_id: %s,' % str(e['codigo'])
+            params += 'name: "%s-%s %s",' % (str(i), str(e['codigo']), e['direccion'])
+            params += 'address: "%s",' % e['direccion']
+            params += 'district:" %s",' % str(e['distrito'])
+            params += 'lat: %s,' % str(e['latitud'].replace(',','.'))
+            params += 'lon: %s' % str(e['longitud'].replace(',','.'))
+            try:
+                graph_session.run(base_query % params)
+            except:
+                import pdb; pdb.set_trace()
+
+            print("Saved %d dog shit containers" % i)
 
         # Link clean_point related trash types
         graph_session.run("""
@@ -128,6 +145,14 @@ class GraphModel(object):
                 MERGE (t)-[:CAN_BE_DEPLOYED_IN]->(c) 
                 RETURN t,c
                 """)
+        # Link dog shit container with their trash type
+        graph_session.run("""
+                    MATCH (t:TrashType), (c:Containers) 
+                    WHERE t.name in ["dog_shit"] 
+                    AND c.container_type = "dog_shit_trash" 
+                    MERGE (t)-[:CAN_BE_DEPLOYED_IN]->(c) 
+                    RETURN t,c
+                    """)
 
     def get_distances(self, lat, lon, container_type):
         query = """
@@ -154,5 +179,4 @@ class GraphModel(object):
             str(lat),
             str(lon)
         )
-        print("Query \n %s" % query)
         return graph_session.run(query)
