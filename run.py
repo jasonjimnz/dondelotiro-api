@@ -14,37 +14,47 @@ g_model = GraphModel()
 def get_distances():
     lat = request.form.get('lat', None)
     lon = request.form.get('lon', None)
-
+    trash_types = [x.strip() for x in request.form.get('trash_types', '').split(',')]
+    print(trash_types)
     if lat and lon:
-        distances_points = [
-            {
-                'latitude': r['latitude'],
-                'longitude': r['longitude'],
-                'distance': r['point_distance'],
-                'container_type': r['container_type'],
-                'trash_types': r['trash_types']
-            } for r in g_model.get_distances(float(lat), float(lon),"clean_point").records()
-        ]
+        if 'clean_point' in trash_types:
+            distances_points = [
+                {
+                    'latitude': r['latitude'],
+                    'longitude': r['longitude'],
+                    'distance': r['point_distance'],
+                    'container_type': r['container_type'],
+                    'trash_types': r['trash_types']
+                } for r in g_model.get_distances(float(lat), float(lon),"clean_point").records()
+            ]
+        else:
+            distances_points = []
 
-        distances_batteries = [
-            {
-                'latitude': r['latitude'],
-                'longitude': r['longitude'],
-                'distance': r['point_distance'],
-                'container_type': r['container_type'],
-                'trash_types': r['trash_types']
-            } for r in g_model.get_distances(float(lat), float(lon),"battery_recycling_point").records()
-        ]
+        if "battery_recycling_point" in trash_types:
+            distances_batteries = [
+                {
+                    'latitude': r['latitude'],
+                    'longitude': r['longitude'],
+                    'distance': r['point_distance'],
+                    'container_type': r['container_type'],
+                    'trash_types': r['trash_types']
+                } for r in g_model.get_distances(float(lat), float(lon),"battery_recycling_point").records()
+            ]
+        else:
+            distances_batteries = []
 
-        distances_dog_shit = [
-            {
-                'latitude': r['latitude'],
-                'longitude': r['longitude'],
-                'distance': r['point_distance'],
-                'container_type': r['container_type'],
-                'trash_types': r['trash_types']
-            } for r in g_model.get_distances(float(lat), float(lon),"dog_shit_trash").records()
-        ]
+        if "dog_shit_trash" in trash_types:
+            distances_dog_shit = [
+                {
+                    'latitude': r['latitude'],
+                    'longitude': r['longitude'],
+                    'distance': r['point_distance'],
+                    'container_type': r['container_type'],
+                    'trash_types': r['trash_types']
+                } for r in g_model.get_distances(float(lat), float(lon),"dog_shit_trash").records()
+            ]
+        else:
+            distances_dog_shit = []
 
         return jsonify(
             {
