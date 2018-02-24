@@ -1,4 +1,5 @@
 import json
+import csv
 from neo4j.v1 import GraphDatabase
 from neo4j.v1 import basic_auth
 from bs4 import BeautifulSoup
@@ -98,19 +99,40 @@ class GraphModel(object):
             MERGE (t:TrashType{name:"%s"})
             """
             graph_session.run(query % t)
+        # marquesinas
+        list_batteries_container = json.load(open('Marquesinas_contenedores_pilas_2017.json'))
+        for i, e in enumerate(list_batteries_container):
+            params = ''
+            params += 'container_type: "battery_recycling_point",'
+            params += 'entity_id: %s,' % e['Parada']
+            params += 'name: "bus_stop_%s-%s",' % (str(i),e['Parada'])
+            params += 'district:" %s",' % e['DISTRITO']
+            params += 'lat: %s,' % e['Latitud']
+            params += 'lon: %s' % e['Longitud']
+            graph_session.run(base_query % params)
+            print("Saved %d batteries container" % i)
 
         # Link clean_point related trash types
         graph_session.run("""
         MATCH (t:TrashType), (c:Containers) 
         WHERE t.name in ["furniture","electronics","batteries"] 
         AND c.container_type = "clean_point" 
-        MERGE (t)-[:CAN_BE_DEPLOYED_IN]-(c) 
+        MERGE (t)-[:CAN_BE_DEPLOYED_IN]->(c) 
         RETURN t,c
         """)
+        # Link batteries container with their trash type
+        graph_session.run("""
+                MATCH (t:TrashType), (c:Containers) 
+                WHERE t.name in ["batteries"] 
+                AND c.container_type = "battery_recycling_point" 
+                MERGE (t)-[:CAN_BE_DEPLOYED_IN]->(c) 
+                RETURN t,c
+                """)
 
-    def get_distances(self, lat, lon):
+    def get_distances(self, lat, lon, container_type):
         query = """
-        MATCH p=(n:Containers)<-[r:CAN_BE_DEPLOYED_IN]-(t:TrashType) 
+        MATCH p=(n:Containers)<-[r:CAN_BE_DEPLOYED_IN]-(t:TrashType)
+        WHERE n.container_type = "%s"
         RETURN  
         n.lat as latitude, 
         n.lon as longitude,
@@ -126,9 +148,11 @@ class GraphModel(object):
         ) 
         as point_distance
 
-        ORDER BY point_distance
+        ORDER BY point_distance LIMIT 5
         """ % (
+            container_type,
             str(lat),
             str(lon)
         )
+        print("Query \n %s" % query)
         return graph_session.run(query)

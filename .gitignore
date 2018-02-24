@@ -104,3 +104,4 @@ config.py
 *.xml
 *.csv
 .idea
+*.xlsx
