@@ -18,8 +18,8 @@ def get_distances():
     if lat and lon:
         distances = [
             {
-                'lat': r['latitude'],
-                'lon': r['longitude'],
+                'latitude': r['latitude'],
+                'longitude': r['longitude'],
                 'distance': r['point_distance'],
                 'container_type': r['container_type'],
                 'trash_types': r['trash_types']
